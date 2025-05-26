@@ -63,25 +63,47 @@ router.post('/login', [
 
     const { email, password } = req.body;
 
-    // Find user by email
-    const user = await User.findOne({ email });
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    console.log('Login attempt for email:', email);
+
+    // Find user by email and explicitly include password field
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      console.log('User not found for email:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    console.log('User found, checking password...');
+    
+    // Validate password exists
+    if (!user.password) {
+      console.log('User password is missing in database');
+      return res.status(500).json({ message: 'Account error - please contact support' });
     }
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      console.log('Password validation failed');
       return res.status(400).json({ message: 'Invalid credentials' });
     }
+
+    console.log('Login successful');
 
     // Generate token
     const token = generateToken(user._id);
 
+    // Remove password before sending response
+    const userResponse = user.toJSON();
+
     res.json({
       message: 'Login successful',
       token,
-      user
+      user: userResponse
     });
   } catch (error) {
     console.error('Login error:', error);

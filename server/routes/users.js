@@ -9,10 +9,12 @@ const router = express.Router();
 // Get all users (excluding current user)
 router.get('/', auth, async (req, res) => {
   try {
+    console.log('Fetching users for explore page...');
     const users = await User.find({ _id: { $ne: req.user._id } })
-      .select('-password')
+      .select('name email bio followers following createdAt')
       .sort({ createdAt: -1 });
     
+    console.log('Found users:', users.length);
     res.json(users);
   } catch (error) {
     console.error('Get users error:', error);

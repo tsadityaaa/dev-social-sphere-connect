@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters']
+    minlength: [6, 'Password must be at least 6 characters'],
+    select: false // Don't include password in queries by default
   },
   bio: {
     type: String,
@@ -54,6 +55,9 @@ userSchema.pre('save', async function(next) {
 
 // Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
+  if (!candidatePassword || !this.password) {
+    throw new Error('Password and hash are required for comparison');
+  }
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

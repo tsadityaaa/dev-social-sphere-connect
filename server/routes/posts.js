@@ -34,6 +34,23 @@ router.post('/', auth, [
   }
 });
 
+// Get all posts (updated to show all posts with user info)
+router.get('/', auth, async (req, res) => {
+  try {
+    console.log('Fetching all posts...');
+    const posts = await Post.find()
+      .populate('userId', 'name email')
+      .sort({ timestamp: -1 })
+      .limit(100);
+
+    console.log('Found posts:', posts.length);
+    res.json(posts);
+  } catch (error) {
+    console.error('Get all posts error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Get timeline posts (posts from followed users + own posts)
 router.get('/timeline', auth, async (req, res) => {
   try {
@@ -64,21 +81,6 @@ router.get('/user/:userId', auth, async (req, res) => {
     res.json(posts);
   } catch (error) {
     console.error('Get user posts error:', error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Get all posts (for admin or general feed)
-router.get('/', auth, async (req, res) => {
-  try {
-    const posts = await Post.find()
-      .populate('userId', 'name email')
-      .sort({ timestamp: -1 })
-      .limit(100);
-
-    res.json(posts);
-  } catch (error) {
-    console.error('Get all posts error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

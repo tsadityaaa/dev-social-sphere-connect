@@ -24,7 +24,8 @@ const Timeline: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/posts/timeline', {
+      // Changed from /timeline to / to get all posts
+      const response = await fetch('http://localhost:5000/api/posts/', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -39,7 +40,7 @@ const Timeline: React.FC = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load timeline. Please try again.",
+        description: "Failed to load posts. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -52,6 +53,11 @@ const Timeline: React.FC = () => {
   }, [token]);
 
   const handlePostCreated = () => {
+    fetchPosts();
+  };
+
+  const handleFollowChange = () => {
+    // Refresh posts to update follow status
     fetchPosts();
   };
 
@@ -68,12 +74,12 @@ const Timeline: React.FC = () => {
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No posts to show. Follow some users to see their posts!</p>
+            <p className="text-gray-600">No posts to show. Start posting to see content!</p>
           </div>
         ) : (
           <div>
             {posts.map(post => (
-              <PostCard key={post._id} post={post} />
+              <PostCard key={post._id} post={post} onFollowChange={handleFollowChange} />
             ))}
           </div>
         )}
